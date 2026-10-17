@@ -1,0 +1,6 @@
+resources_dir: ../Resources
+searchable_dir: .knowledge/searchable
+catalog_path: CATALOG.md
+state_path: .knowledge/state.json
+context_lines: 4
+unenrolled_subjects: []
