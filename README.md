@@ -9,6 +9,8 @@ A local, grep-first knowledge layer for private study materials. It extracts sea
 
 Private source files, extracted text, index state, and the generated catalog stay under the configured `Resources` directory.
 
+Each indexing run sends its own Google Chat summary with counts and names of added, updated, and removed documents. Store the webhook only in the ignored `.env`; notification behavior remains in `config.yml`.
+
 Subjects that should remain outside the active course index can be listed by their exact directory names:
 
 ```yaml

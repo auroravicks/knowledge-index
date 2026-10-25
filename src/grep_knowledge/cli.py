@@ -4,6 +4,7 @@ import click
 
 from .config import Config
 from .indexer import build_index
+from .notifications import send_index_summary
 from .search import search as run_search
 
 
@@ -16,8 +17,10 @@ def cli() -> None:
 def index() -> None:
     """Extract changed source files and refresh CATALOG.md."""
     try:
-        result = build_index(Config.load())
-    except (OSError, ValueError) as exc:
+        config = Config.load()
+        result = build_index(config)
+        send_index_summary(config, result)
+    except (OSError, RuntimeError, ValueError) as exc:
         raise click.ClickException(str(exc)) from exc
     click.echo(
         f"Knowledge index: files={result['files']} indexed={result['indexed']} "
@@ -42,4 +45,3 @@ def search(query: str, subject: str | None, kind: str | None, context: int | Non
 
 if __name__ == "__main__":
     cli()
-

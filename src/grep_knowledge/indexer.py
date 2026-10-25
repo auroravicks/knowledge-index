@@ -35,6 +35,8 @@ def build_index(config: Config) -> dict[str, object]:
     catalog: dict[str, list[tuple[str, str]]] = {}
     errors: list[str] = []
     indexed = skipped = 0
+    added: list[str] = []
+    updated: list[str] = []
 
     for subject_dir in sorted(
         path
@@ -61,8 +63,26 @@ def build_index(config: Config) -> dict[str, object]:
                     header = f"[[SUBJECT: {subject}]]\n[[SOURCE: {relative}]]\n[[TYPE: {kind}]]\n\n"
                     _write(target, header + body)
                     indexed += 1
+                    if relative in previous:
+                        updated.append(relative)
+                    else:
+                        added.append(relative)
                 except Exception as exc:
                     errors.append(f"{relative}: {type(exc).__name__}: {exc}")
+
+    removed = sorted(set(previous) - set(current))
+    searchable_root = config.searchable_dir.resolve()
+    for relative in removed:
+        old_target = previous.get(relative, {}).get("target")
+        if not old_target:
+            continue
+        target = (config.resources_dir / old_target).resolve()
+        try:
+            target.relative_to(searchable_root)
+        except ValueError:
+            continue
+        if target.is_file():
+            target.unlink()
 
     lines = ["# Knowledge catalog", "", f"Updated: {datetime.now(UTC).isoformat()}", ""]
     for subject, items in sorted(catalog.items()):
@@ -74,4 +94,12 @@ def build_index(config: Config) -> dict[str, object]:
         lines += ["## Extraction errors", ""] + [f"- {error}" for error in errors] + [""]
     _write(config.catalog_path, "\n".join(lines))
     _write(config.state_path, json.dumps({"updated_at": datetime.now(UTC).isoformat(), "files": current}, indent=2))
-    return {"indexed": indexed, "unchanged": skipped, "errors": errors, "files": len(current)}
+    return {
+        "indexed": indexed,
+        "unchanged": skipped,
+        "errors": errors,
+        "files": len(current),
+        "added": sorted(added),
+        "updated": sorted(updated),
+        "removed": removed,
+    }

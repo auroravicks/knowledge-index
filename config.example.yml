@@ -3,4 +3,9 @@ searchable_dir: .knowledge/searchable
 catalog_path: CATALOG.md
 state_path: .knowledge/state.json
 context_lines: 4
+notifications:
+  google_chat:
+    enabled: true
+    summary_max_items: 20
+unenrolled_subjects: []
 unenrolled_subjects: []
