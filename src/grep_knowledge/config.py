@@ -17,8 +17,12 @@ class Config:
     context_lines: int
     unenrolled_subjects: frozenset[str] = frozenset()
     google_chat_webhook_url: str | None = None
-    google_chat_enabled: bool = True
+    google_chat_enabled: bool = False
     summary_max_items: int = 20
+    log_level: str = "INFO"
+    log_dir: Path | None = None
+    log_max_bytes: int = 2_097_152
+    log_backup_count: int = 5
 
     @classmethod
     def load(cls, path: Path = Path("config.yml")) -> "Config":
@@ -39,6 +43,9 @@ class Config:
         google_chat = notifications.get("google_chat", {})
         if not isinstance(google_chat, dict):
             raise ValueError("notifications.google_chat must be a mapping")
+        logging_config = data.get("logging", {})
+        if not isinstance(logging_config, dict):
+            raise ValueError("logging must be a mapping")
         return cls(
             resources_dir=resources,
             searchable_dir=resources / data.get("searchable_dir", ".knowledge/searchable"),
@@ -47,8 +54,12 @@ class Config:
             context_lines=int(data.get("context_lines", 4)),
             unenrolled_subjects=frozenset(subject.casefold() for subject in raw_unenrolled),
             google_chat_webhook_url=os.getenv("GOOGLE_CHAT_WEBHOOK_URL") or None,
-            google_chat_enabled=bool(google_chat.get("enabled", True)),
+            google_chat_enabled=bool(google_chat.get("enabled", False)),
             summary_max_items=int(google_chat.get("summary_max_items", 20)),
+            log_level=str(logging_config.get("level", "INFO")).upper(),
+            log_dir=resources / str(logging_config.get("directory", ".knowledge/logs")),
+            log_max_bytes=int(logging_config.get("max_bytes", 2_097_152)),
+            log_backup_count=int(logging_config.get("backup_count", 5)),
         )
 
     def is_enrolled(self, subject: str) -> bool:

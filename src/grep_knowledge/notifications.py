@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import json
+import logging
 from typing import Any
 from urllib.request import Request, urlopen
 
 from .config import Config
+
+LOGGER = logging.getLogger(__name__)
 
 
 def build_index_summary(result: dict[str, Any], max_items: int = 20) -> str:
@@ -38,6 +41,7 @@ def build_index_summary(result: dict[str, Any], max_items: int = 20) -> str:
 
 def send_index_summary(config: Config, result: dict[str, Any]) -> None:
     if not config.google_chat_enabled:
+        LOGGER.info("Google Chat notifications are disabled")
         return
     if not config.google_chat_webhook_url:
         raise ValueError("GOOGLE_CHAT_WEBHOOK_URL is not configured in Knowledge/.env")
@@ -51,3 +55,4 @@ def send_index_summary(config: Config, result: dict[str, Any]) -> None:
     with urlopen(request, timeout=30) as response:
         if not 200 <= response.status < 300:
             raise RuntimeError(f"Google Chat returned HTTP {response.status}")
+    LOGGER.info("Google Chat knowledge summary delivered")

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "grep-knowledge"
 version = "0.1.0"
-description = "Grep-first local study knowledge tooling"
+description = "Cross-platform, grep-first local study knowledge tooling"
 requires-python = ">=3.11"
 dependencies = [
   "click>=8.1,<9",

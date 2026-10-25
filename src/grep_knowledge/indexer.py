@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import os
 from datetime import UTC, datetime
 from pathlib import Path
@@ -10,6 +11,7 @@ from .config import Config
 from .extractors import extract
 
 SUPPORTED = {".pdf", ".docx", ".pptx", ".ipynb", ".txt", ".md", ".csv", ".tsv", ".py", ".r"}
+LOGGER = logging.getLogger(__name__)
 
 
 def _hash(path: Path) -> str:
@@ -68,7 +70,9 @@ def build_index(config: Config) -> dict[str, object]:
                     else:
                         added.append(relative)
                 except Exception as exc:
-                    errors.append(f"{relative}: {type(exc).__name__}: {exc}")
+                    error = f"{relative}: {type(exc).__name__}: {exc}"
+                    errors.append(error)
+                    LOGGER.warning("Document extraction failed: %s", error, exc_info=True)
 
     removed = sorted(set(previous) - set(current))
     searchable_root = config.searchable_dir.resolve()
