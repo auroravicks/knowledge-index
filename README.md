@@ -80,18 +80,3 @@ See `AGENTS.md`, `CITATION_RULES.md`, and `STUDY_WORKFLOWS.md` for a Codex-orien
 Google Chat summaries are optional. When enabled in `config.yml`, put `GOOGLE_CHAT_WEBHOOK_URL` only in the ignored `.env`. Each index run reports added, updated, removed, unchanged, and failed documents.
 
 Set `notifications.google_chat.enabled: false` for a completely local workflow.
-
-## Orchestration
-
-The runner is a finite process and does not require a resident shell.
-
-For a collector-first pipeline, keep the orchestrator outside both repositories and rely on normal process exit codes:
-
-```bash
-#!/usr/bin/env sh
-set -eu
-/bin/sh /absolute/path/to/moodle-lms-automation/run.sh
-/bin/sh /absolute/path/to/grep-knowledge/run.sh
-```
-
-The second command runs only after the collector succeeds.
